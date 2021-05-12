@@ -6,6 +6,7 @@ import 'package:assault/ui/router/router.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -47,6 +48,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return introProvider.currentIndex == index
         ? Color(0xFF727AEF)
         : Color(0xFFEFEFEF);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = new PageController();
   }
 
   @override
@@ -103,9 +110,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           CircleAvatar(
                             radius: 90.0,
                             backgroundColor: Color(0xFFEFEFEF),
-                            // child: SvgPicture.asset(
-                            //   introProvider.introModel[index].imagePath,
-                            // ),
+                            child: SvgPicture.asset(
+                              introProvider.introModel[index].imagePath,
+                            ),
                           ),
                           SizedBox(
                             height: SizeConfig.minBlockVertical * 4.0,
@@ -144,9 +151,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 text: introProvider.currentIndex == 2 ? 'Get Started' : 'Next',
                 onPressed: () {
                   if (introProvider.currentIndex == 2) {
-                    // ExtendedNavigator.of(context)
-                    //     .popAndPush(Routes.introScreen);
-                    // userProvider.saveLaunchKey(key: true);
+                    ExtendedNavigator.of(context)
+                        .popAndPush(Routes.loginScreen);
                   } else {
                     int currentIndex = introProvider.currentIndex;
                     introProvider.setIndex(currentIndex++);

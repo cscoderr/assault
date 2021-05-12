@@ -1,5 +1,9 @@
+import 'dart:async';
 import 'package:assault/providers/user_provider.dart';
+import 'package:assault/ui/core/constants.dart';
+import 'package:assault/ui/core/dialogs.dart';
 import 'package:assault/ui/core/input_box.dart';
+import 'package:assault/ui/core/show_snicks.dart';
 import 'package:assault/ui/core/size_config.dart';
 import 'package:assault/ui/core/solid_button.dart';
 import 'package:assault/ui/core/styles.dart';
@@ -11,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({Key key}) : super(key: key);
+  LoginScreen();
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -22,7 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final _dialogLoginCodeKeyLoader = new GlobalKey<State>();
+  final _dialogKey = new GlobalKey<State>();
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -31,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
-    final UserProvider userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -89,8 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         validator: (value) {
                           if (value.trim().isEmpty)
                             return 'Password cannot be empty';
-                          if (value.trim().length < 5)
-                            return 'Password cannot be less than 5 characters';
+                          if (value.trim().length < 8)
+                            return 'Password cannot be less than 8 characters';
                           return null;
                         },
                         borderSide: BorderSide(
@@ -118,8 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    // ExtendedNavigator.of(context)
-                                    //     .push(Routes.forgotPasswordScreen);
+                                    ExtendedNavigator.of(context)
+                                        .push(Routes.resetPasswordScreen);
                                   },
                               ),
                             ],
@@ -131,35 +136,63 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SolidButton(
                         text: 'Login',
+                        onPressed: () async {
+                          if (_formState.currentState.validate()) {
+                            //_formState.currentState.save();
+                            Dialogs.showLoadingDialog(context, key: _dialogKey);
+                            final _response = await userProvider.login(
+                                email: _emailController.text,
+                                password: _passwordController.text);
+                            if (_response.status == false &&
+                                _response.data == null) {
+                              Timer(Duration(seconds: 1), () {
+                                displayErrorSnick(
+                                    error: _response.message,
+                                    context: _dialogKey.currentContext,
+                                    scaffoldKey: _scaffoldKey);
+                              });
+                            } else {
+                              // Navigator.of(_dialogKey.currentContext,
+                              //         rootNavigator: true)
+                              //     .pop();
+                              ExtendedNavigator.of(context).pushAndRemoveUntil(
+                                  Routes.homeScreen, (route) => false);
+                            }
+                          }
+                        },
+                        color: kPrimaryColor,
+                        textColor: Colors.white,
+                      ),
+                      SizedBox(
+                        height: SizeConfig.minBlockVertical,
+                      ),
+                      Text(
+                        'OR',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(
+                        height: SizeConfig.minBlockVertical,
+                      ),
+                      SolidButton(
+                        text: 'Login Anonymously',
                         onPressed: () {
-                          // if (_formState.currentState.validate()) {
-                          //   // userProvider
-                          //   _formState.currentState.save();
-                          //   // print(_firstNameController.text);
-                          //   LoadingIndicator.isLoadingInd(context,
-                          //       key: _dialogLoginCodeKeyLoader);
-                          //   userProvider
-                          //       .signIn(
-                          //           email: _emailController.text,
-                          //           password: _passwordController.text)
-                          //       .then((value) {
-                          //     // if (value['success'] == false &&
-                          //     //     value['data'] == null) {
-                          //       // displayErrorSnick(
-                          //       //     error: value['error'].toString(),
-                          //       //     context: _dialogLoginCodeKeyLoader,
-                          //       //     scaffoldKey: _scaffoldKey);
-                          //     // } else {
-                          //     //   Navigator.of(
-                          //     //           _dialogLoginCodeKeyLoader
-                          //     //               .currentContext,
-                          //     //           rootNavigator: true)
-                          //     //       .pop();
-                          //     //   ExtendedNavigator.of(context)
-                          //     //       .push(Routes.homeScreen);
-                          //     // }
-                          //   });
-                          // }
+                          Dialogs.showLoadingDialog(context, key: _dialogKey);
+
+                          Timer(Duration(seconds: 2), () {
+                            userProvider.loginAnonymously().then((value) {
+                              if (value) {
+                                Navigator.of(_dialogKey.currentContext,
+                                        rootNavigator: true)
+                                    .pop();
+                                ExtendedNavigator.of(context)
+                                    .pushAndRemoveUntil(
+                                        Routes.homeScreen, (route) => false);
+                              }
+                            });
+                          });
                         },
                         color: kPrimaryColor,
                         textColor: Colors.white,

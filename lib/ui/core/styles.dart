@@ -6,6 +6,7 @@ const kSecondaryColor2 = Color(0xFFFF2060);
 const kPrimaryIconColor = Color(0xFFEBEBEB);
 const kSecondaryIconColor = Color(0xFF727AEF);
 const kScaffoldColor = Color(0xFFFFFFFF);
+const kSuccessColor = Color(0xFF8DD35F);
 
 const kWhiteColor = Color(0xFFFFFFFF);
 const kBlackColor = Color(0xFF000000);

@@ -16,6 +16,7 @@ class InputBox extends StatelessWidget {
   final BorderSide borderSide;
   final double iconSize;
   final bool isWritable;
+  final VoidCallback onIconClick;
   InputBox(
       {this.controller,
       this.validator,
@@ -29,7 +30,8 @@ class InputBox extends StatelessWidget {
       this.raduis = 15.0,
       this.borderSide = BorderSide.none,
       this.iconSize = 24.0,
-      this.isWritable = true});
+      this.isWritable = true,
+      this.onIconClick});
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -83,10 +85,13 @@ class InputBox extends StatelessWidget {
           padding: EdgeInsets.only(
             right: 25.0,
           ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: this.iconSize,
+          child: GestureDetector(
+            onTap: onIconClick,
+            child: Icon(
+              icon,
+              color: Colors.grey,
+              size: this.iconSize,
+            ),
           ),
         ),
       ),
